@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>scrypt test page</title>
+    <script src="scrypt.js"></script>
+    <script src="encoding.js"></script>
+  </head>
+  <body>
+    <h1>scrypt test page</h1>
+    <p>Note that this page does little input validation. If you pass
+    something that crypto_scrypt() doesn't like, you'll get an
+    uncaught exception and no results.</p>
+    <form id="scrypt">
+      <p><label>Password: <input id="passwd" type="text"/></label></p>
+      <p><label>Salt: <input id="salt" type="text"/></label></p>
+      <p><label>N: <input id="N" type="number" min="1" value="16384" step="1"/></label></p>
+      <p><label>r: <input id="r" type="number" min="1" value="8" step="1"/></label></p>
+      <p><label>p: <input id="p" type="number" min="1" value="1" step="1"/></label></p>
+      <p><label>output length: <input id="outlen" type="number" min="1" value="64" step="1"/></label></p>
+      <p><button id="compute" type="button">Compute SCrypt</button></p>
+      <hr/>
+      <p>Result: <output id="result"></output></p>
+      <p>Time: <output id="time"></output></p>
+    </form>
+    <script>
+var compute = document.getElementById('compute')
+var utf8Encoder = TextEncoder('utf-8');
+compute.onclick = function(){
+  var result_elem = document.getElementById('result');
+  var time_elem = document.getElementById('time');
+  result_elem.value = '';
+  time_elem.value = '';
+
+  var input = document.getElementById('scrypt').elements;
+  var passwd_utf8 = utf8Encoder.encode(input.passwd.value);
+  var salt_utf8 = utf8Encoder.encode(input.salt.value);
+  var start_time = window.performance.now();
+  var result = crypto_scrypt(passwd_utf8, salt_utf8,
+                             input.N.value, input.r.value, input.p.value,
+                             input.outlen.value);
+  var end_time = window.performance.now();
+  var result_str = '';
+  for (var i = 0; i < result.length; ++i)
+    result_str += (result[i] >> 4).toString(16) + (result[i] & 15).toString(16) + ' ';
+  result_elem.value = result_str;
+  time_elem.value = (end_time - start_time) + 'ms';
+}
+</script>
+  </body>
+</html>
